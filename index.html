@@ -1,0 +1,180 @@
+<html>
+    <head>
+        <title>Strive - Calendar</title>
+        <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">
+        <style>
+        
+            body{
+                max-width: 768px;
+                margin: 0 auto;
+                background: #181818;
+                color: white;
+                font-family: 'Nunito', sans-serif;
+                margin-bottom: 50px;
+            }
+            #calendar {
+                width: 100%;
+                margin-bottom: 20px;
+                border: 1px solid white;
+            }
+            #calendar .day{
+                width:20%; /* 5 per line*/ 
+                width: 150px;
+                display: inline-block;
+                text-align: center;
+                min-height: 100px;
+                line-height: 100px;
+                margin:auto;
+            }
+            h1{
+                text-align:center;
+                margin-top: 20px;
+                color: #ef3d59;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+            .selected{
+                color:#ef3d59;
+                border: 1px solid #ef3d59;
+            }
+            input {
+                background: #ef3d59;
+                color: white;
+                border: 0px;
+                padding: 10px;
+                font-weight: bold;
+            }
+            #addMeeting{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 50px;
+            }
+            #addMeeting div{
+                text-align: center;
+            }
+            .withEvent{
+                font-weight: bolder;
+                text-decoration: underline;
+                color:#ef3d59;
+            }
+            #appointments{
+                display:none;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Strive Calendar</h1>
+        <div id="calendar" ></div>
+        
+        <!-- Display appointments-->
+        <div id="appointments">
+                <h1>Appointments</h1>
+                <ul id="appointmentsList"></ul>
+        </div>
+
+        <!-- Add appointments-->
+        <h1>Add Meeting</h1>
+        <div id="addMeeting">
+            <div>
+                <h4>Day</h4>
+                <h4 id="newMeetingDay">Click on a day</h4>
+            </div>
+            <div>
+                <h4>Meeting Time</h4>
+                <input type="time" id="newMeetingTime" />
+            </div>
+            <div>
+                <h4>Meeting name</h4>
+                <input type="text" id="newMeetingName" placeholder="Meeting name" />
+            </div>
+            <div>
+                <h4>Add</h4>
+                <input type="button" onclick="AddMeeting()" value="Add Meeting" />
+            </div>
+        </div>
+
+        <script>
+        var numberOfDays = 30;     //numbers of days
+        var appointments = [];
+        window.onload=function(){
+        
+            var calendar = document.getElementById("calendar"); //getting reference to calendar
+            for (var i = 0; i < numberOfDays; i++){ //foreach day in the month
+                //Add a day cell on my calendar
+                var child = document.createElement("div"); //creating container
+                child.className = "day"; //assign class to container
+                appointments[i] = [];
+                //Add click eventListener
+                child.addEventListener("click", selectDay);
+                // child.addEventListener("mouseenter", showHoverAppoints);
+                var displayDay = document.createElement("h3"); //creating the "display number"
+                displayDay.innerText = i+1; //assigning the current day (in the loop)
+                child.appendChild(displayDay); //add them them to DOM
+                calendar.appendChild(child); //add to DOM
+            }
+        }
+        function AddMeeting(){
+            var meetingTime = document.getElementById("newMeetingTime").value;
+            var meetingName = document.getElementById("newMeetingName").value;
+            var meetingDay = document.getElementById("newMeetingDay").innerText;
+            var day = parseInt(meetingDay) -1;
+            appointments[day].push(meetingTime + " : " + meetingName);
+            //get the specific cell
+            var calendar = document.getElementById("calendar");
+            var calendarCell = calendar.children[day];
+            if (appointments[day].length == 1){
+                calendarCell.classList.add("withEvent");
+            }
+            showAppointments(day);
+        }
+        function showHoverAppoints(event){
+            console.log(event.currentTarget.innerText);
+            var hoveringDay = parseInt(event.currentTarget.innerText);
+            showAppointments(hoveringDay - 1);
+        }
+        function showAppointments(day) {
+            var appointmentsForTheDay = appointments[day];
+            var appList = document.getElementById("appointmentsList");
+            appList.innerHTML = ''; //REMOVING previous appointments;
+            
+            document.getElementById("appointments").style.display = appointmentsForTheDay.length === 0 ? "none" : "block";
+            // if (appointmentsForTheDay.length === 0){
+            //     document.getElementById("appointments").style.display = 'none';
+            // }
+            // else{
+            //     document.getElementById("appointments").style.display = 'block';
+            // }
+            for (var i = 0; i < appointmentsForTheDay.length; i++){
+                var newListItem = document.createElement("li");
+                newListItem.innerText = appointmentsForTheDay[i];
+                appList.appendChild(newListItem);
+            }
+        }
+        function selectDay(event){
+            var selectedDay = event.target.innerText;
+            var newMeetingDay = document.getElementById("newMeetingDay");
+            newMeetingDay.innerText = selectedDay;
+            var days = document.getElementsByClassName("day");
+            for (var i = 0; i < days.length; i++){
+                days[i].classList.remove("selected");
+            }
+            //event.target.className ="selected";
+            //1) we were targeting the h3, not the DIV
+            // event.target.parentElement insted of simply event.target
+            //2) we were assign the class, replacing the previous one
+            // event.target.parentElement.classList.add("selected") instead of event.target.parentElement.className = "selected";
+            if (event.target.tagName === "DIV"){
+                //if we are on the div, attach the class
+                 event.target.classList.add("selected");
+            }
+            else {
+                //otherwise, attach it to my parent
+                 event.target.parentElement.classList.add("selected");
+            }
+            //event.currentTarget.classList.add("selected");
+            showAppointments(parseInt(selectedDay) - 1);
+        }
+        </script>
+    </body>
+</html>
